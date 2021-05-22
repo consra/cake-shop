@@ -6,8 +6,7 @@ Cake Shop Online App
 # Services
 - MySQL Database
     - Consists of a series of tables that hold customer data, orders, products, list with the main ingredients of each product, as well as a table in which the customer login session is saved and a table where the messages are logged.
-    - Database Diagram
-    ![](https://github.com/alicesuiu/cake-shop/blob/master/pictures/mysql_diagram.png)
+    ![Database Diagram](https://github.com/alicesuiu/cake-shop/blob/master/pictures/mysql_diagram.png)
 - Business Logic Server
     - Exposes numerous endpoints used by the Web application. For each table there are two main endpoints - one for GET requests that select the elements from database and sends them in JSON format to the Web and one for POST requests that add the data received from the Web to the MySQL database. The server also exposes two endpoints one for login and one for logout.
     - Written in Python 3 with Flask.
