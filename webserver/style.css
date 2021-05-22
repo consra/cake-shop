@@ -1,0 +1,135 @@
+body {
+	background: linear-gradient(to right, #232526, #414345); !important;
+}
+
+.myNav {
+	box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.42), 0 6px 10px 0 rgba(0, 0, 0, 0.3), 0 1px 18px 0 rgba(0, 0, 0, 0.3);
+	background: linear-gradient(to left, #cd7b3d, #428673) !important;
+}
+
+.meniu {
+	margin-top: 20px;
+	height: 86vh;
+}
+
+.row {
+	margin-right: 0px !important;
+	margin-left: 0px !important;
+}
+
+.active {
+	background: linear-gradient(to left, #cd7b3d, #345f51) !important;
+}
+
+.nav-link {
+	text-align: center;
+	background-color: #47937f;
+	color: white;
+	box-shadow: 0 3px 5px -1px rgba(0,0,0,.2), 0 6px 10px 0 rgba(0,0,0,.14), 0 1px 18px 0 rgba(0,0,0,.12);
+}
+
+.navigation {
+	font-size: 25px;
+	font-weight: lighter;
+	letter-spacing: 7px;
+	text-transform: uppercase;
+	margin-left: 30px;
+}
+
+.form-control {
+	margin:15px 0px;
+}
+
+.index-links div {
+	margin:16px 14px 0;
+	width:calc(100% - 32px);
+	height:100px;
+	background-color: #47947f;
+	box-shadow: 0 0 12px #47947f;
+}
+
+.index-links div h3:hover {
+	border: 0.5px solid #117a8b;
+	box-shadow: 0 3px 5px -1px rgba(0,0,0,.2), 0 6px 10px 0 rgba(0,0,0,.14), 0 1px 18px 0 rgba(0,0,0,.12);
+
+}
+
+.index-links div h3{
+	font-family:Oswald;
+	font-size : 30px;
+	font-weight: 700;
+	color: #fff;
+	text-align: center ;
+	text-transform: uppercase;
+    line-height: 100px;
+    
+}
+@media only screen and (min-width: 1000px){
+	.index-banner{
+		height: 500px;
+	}
+	.index-banner h1{
+		padding-top: 100px;
+	}
+	.index-banner h2{
+		margin-top: 240px;
+	}
+	.index-links{
+		overflow: hidden;
+		
+	}
+    .index-links div{
+    	height: 200px;
+    	margin: 20px 10px 1px;
+    	float: left;
+    }
+    .index-links div h3{
+		line-height: 200px;
+	}
+	.index-boxlink-square{
+		width:calc(25% - 20px) !important;
+	}
+	.index-boxlink-rectangle{
+		width:calc(50% - 20px) !important;
+	}
+	.wrapper{
+		width:1000px;
+		margin: 0 auto;
+	}
+	.quote{
+		margin-top: 90px;
+	}
+
+}
+
+.card-body2 {
+	background: #47947f;
+	padding: 20px;
+	box-shadow: 0 3px 5px -1px rgba(0,0,0,.2), 0 6px 10px 0 rgba(0,0,0,.14), 0 1px 18px 0 rgba(0,0,0,.12);
+
+} 
+
+.card-body {
+	background: #ccc3b459;
+	box-shadow: 0 3px 5px -1px rgba(0,0,0,.2), 0 6px 10px 0 rgba(0,0,0,.14), 0 1px 18px 0 rgba(0,0,0,.12);
+
+}
+
+.card-title {
+	background: #ce7c3f;
+	color: white;
+	font-size: 24px;
+	text-transform: uppercase;
+	text-align: center;
+	padding: 5px;
+}
+
+.cardDenumire {
+	font-weight: bolder;
+	font-size: 18px;
+}
+
+.selData {
+	margin: 20px 10px;
+	width: 150px;
+}
