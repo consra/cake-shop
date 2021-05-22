@@ -1,0 +1,146 @@
+version: "3.3"
+services:
+   mysql:
+    image: mysql:8.0.22
+    ports:
+      - "32000:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD_FILE=/run/secrets/mysql-password
+    volumes:
+      - ./mysql:/docker-entrypoint-initdb.d/:ro
+      - db-volume:/var/lib/mysql
+    networks:
+      - mysql_backend
+      - mysql_adapter
+      - mysql_authserver
+    secrets:
+      - mysql-password
+
+   influxdb:
+    image: influxdb:1.8.3
+    environment:
+      - INFLUXDB_DATA_MAX_SERIES_PER_DATABASE=0
+    networks:
+      - influxdb_adapter
+      - influxdb_grafana
+
+   pyserver:
+    build: ./pyserver
+    ports:
+      - "5000:5000"
+    environment:
+      - MSDATABASE=cake_shop
+      - MSUSER_FILE=pyserver-user
+      - MSPASSWORD_FILE=pyserver-password
+      - MSPORT=3306
+      - MSHOST=mysql
+    networks:
+      - backend_frontend
+      - mysql_backend
+    depends_on:
+      - mysql
+    secrets:
+      - pyserver-user
+      - pyserver-password
+
+   authserver:
+    build: ./authserver
+    ports:
+      - "5555:5555"
+    environment:
+      - MSDATABASE=cake_shop
+      - MSUSER_FILE=authserver-user
+      - MSPASSWORD_FILE=authserver-password
+      - MSPORT=3306
+      - MSHOST=mysql
+    networks:
+      - mysql_authserver
+      - authserver_frontend
+    depends_on:
+      - mysql
+    secrets:
+      - authserver-user
+      - authserver-password
+
+   webserver:
+    build: ./webserver
+    ports:
+      - "8080:80"
+    networks:
+      - backend_frontend
+      - authserver_frontend
+    depends_on:
+      - mysql
+      - pyserver
+      - authserver
+
+   adapter:
+    build: ./adapter
+    environment:
+      - MSDATABASE=cake_shop
+      - MSUSER_FILE=adapter-user
+      - MSPASSWORD_FILE=adapter-password
+      - MSPORT=3306
+      - MSHOST=mysql
+      - IDBHOST=influxdb
+      - IDBDATABASE=cake_shop
+      - IDBPORT=8086
+    networks:
+      - mysql_adapter
+      - influxdb_adapter
+    depends_on:
+      - mysql
+      - influxdb
+    secrets:
+      - adapter-user
+      - adapter-password
+
+   grafana:
+    image: grafana/grafana:7.3.7
+    ports:
+      - "80:3000"
+    volumes:
+      - ./grafana:/var/lib/grafana
+      - ./grafana-provisioning/:/etc/grafana/provisioning
+    environment:
+      - GF_SECURITY_ADMIN_USER_FILE=/run/secrets/grafana-admin-user
+      - GF_SECURITY_ADMIN_PASSWORD_FILE=/run/secrets/grafana-admin-password
+    networks:
+      - influxdb_grafana
+    depends_on:
+      - influxdb
+    secrets:
+      - grafana-admin-user
+      - grafana-admin-password
+
+volumes:
+  db-volume:
+
+networks:
+  mysql_backend:
+  mysql_adapter:
+  influxdb_adapter:
+  influxdb_grafana:
+  backend_frontend:
+  mysql_authserver:
+  authserver_frontend:
+
+secrets:
+  pyserver-user:
+    file: './secrets/pyserver-user.txt'
+  pyserver-password:
+    file: './secrets/pyserver-password.txt'
+  authserver-user:
+    file: './secrets/authserver-user.txt'
+  authserver-password:
+    file: './secrets/authserver-password.txt'
+  adapter-user:
+    file: './secrets/adapter-user.txt'
+  adapter-password:
+    file: './secrets/adapter-password.txt'
+  mysql-password:
+    file: './secrets/mysql-password.txt'
+  grafana-admin-user:
+    file: './secrets/grafana-admin-user.txt'
+  grafana-admin-password:
+    file: './secrets/grafana-admin-password.txt'
