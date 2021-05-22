@@ -1,0 +1,3 @@
+mysql.connector-python
+influxdb
+get_docker_secret
