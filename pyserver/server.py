@@ -49,10 +49,11 @@ def get_ingredients():
 		result = []
 		for row in cursor.stored_results():
 			result = row.fetchall()
-		for id, name in result:
+		for id, name, stock in result:
 			ingredient = {}
 			ingredient['ID_INGREDIENT'] = int(id)
 			ingredient['NAME'] = name
+			ingredient['STOCK'] = int(stock)
 			ingredients.append(ingredient)
 
 		response["data"] = ingredients
@@ -71,13 +72,32 @@ def add_ingredient():
 		cursor = connection.cursor()
 		data = request.json
 		name = data['NAME']
-		cursor.callproc('add_ingredient', [name])
+		stock = data['STOCK']
+		cursor.callproc('add_ingredient', [name, stock])
 		cursor.close()
 		connection.close()
 		response['status'] = SUCCESS
 	except:
 		response['status'] = SERVER_ERROR
 	return json.dumps(response)
+
+@app.route('/ingredients', methods=['PUT'])
+def update_ingredient():
+	connection = mysql.connector.connect(**config)
+	response = {}
+	try:
+		cursor = connection.cursor()
+		data = request.json
+		id_ingr = data['ID_INGREDIENT']
+		stock = data['STOCK']
+		cursor.callproc('update_ingredient', [int(id_ingr), stock])
+		cursor.close()
+		connection.close()
+		response['status'] = SUCCESS
+	except:
+		response['status'] = SERVER_ERROR
+	return json.dumps(response)
+
 
 @app.route('/ingredients/<id>', methods=['DELETE'])
 def delete_ingredient(id):
@@ -105,7 +125,7 @@ def get_products():
 		products = []
 		for row in cursor.stored_results():
 			result = row.fetchall()
-		for id, name, desc, price, unit, ingr, categ in result:
+		for id, name, desc, price, unit, ingr, categ, status in result:
 			product = {}
 			product['ID_PRODUCT'] = int(id)
 			product['NAME'] = name
@@ -113,12 +133,13 @@ def get_products():
 			product['PRICE'] = int(price)
 			product['MEASURE_UNIT'] = unit
 			product['CATEGORY'] = categ
+			product['STATUS'] = status
 
 			cursor.callproc('select_ingredient', [int(ingr)])
 			result_1 = []
 			for row in cursor.stored_results():
 				result_1 = row.fetchall()
-			for _, name in result_1:
+			for _, name, _ in result_1:
 				product['MAIN_INGREDIENT'] = name
 			products.append(product)
 		response["data"] = products
@@ -142,7 +163,23 @@ def add_product():
 		unit = data['MEASURE_UNIT']
 		id_ingr = int(data['MAIN_INGREDIENT'])
 		categ = data['CATEGORY']
-		cursor.callproc('add_product', [name, desc, price, unit, id_ingr, categ])
+
+		cursor.callproc('select_ingredient', [id_ingr])
+		result = []
+		for row in cursor.stored_results():
+			result = row.fetchall()
+		stock_ingr = 0
+		name_ingr = ''
+		for _, name_ingredient, stock in result:
+			stock_ingr = int(stock)
+			name_ingr = name_ingredient
+
+		if stock_ingr == 0:
+			response['data'] = name_ingr
+			response['status'] = 700
+			return json.dumps(response)
+
+		cursor.callproc('add_product', [name, desc, price, unit, id_ingr, categ, 'available'])
 		cursor.close()
 		connection.close()
 		response['status'] = SUCCESS
@@ -248,7 +285,7 @@ def get_orders(token):
 				result_2 = []
 				for row in cursor.stored_results():
 					result_2 = row.fetchall()
-				for _, name, _, price, _, _, categ in result_2:
+				for _, name, _, price, _, _, categ, _ in result_2:
 					order['PRODUCT_NAME'] = name
 					order['PRODUCT_CATEGORY'] = categ
 					total_price = int(quantity) * int(price)
@@ -278,10 +315,33 @@ def add_order():
 		cursor.execute(func, (token,))
 		id_user = cursor.fetchone()
 		id_user = id_user[0]
-		cursor.callproc('add_order', [date_cmd, 0, id_user, quantity])
-
 		id_prod = int(data['ID_PRODUCT'])
 		print(id_prod)
+
+		result = []
+		cursor.callproc('select_product_id', [id_prod])
+		for row in cursor.stored_results():
+			result = row.fetchall()
+		ingredient = 0
+		for _, _, _, _, _, main_ingr, _, _ in result:
+			ingredient = int(main_ingr)
+
+		cursor.callproc('select_ingredient', [ingredient])
+		result = []
+		for row in cursor.stored_results():
+			result = row.fetchall()
+		stock_ingr = 0
+		name_ingr = ''
+		for _, name, stock in result:
+			stock_ingr = int(stock)
+			name_ingr = name
+
+		if stock_ingr < quantity:
+			response['status'] = 700
+			return json.dumps(response)
+
+		cursor.callproc('add_order', [date_cmd, 0, id_user, quantity])
+
 		cursor.execute('SELECT MAX(ID) FROM ORDER_LIST')
 		id_record = cursor.fetchone()
 		id_record = id_record[0]
@@ -296,9 +356,14 @@ def add_order():
 		id_cmd = id_cmd[0]
 		print(id_cmd)
 		cursor.callproc('add_order_list', [id_record, id_prod, quantity, id_cmd])
-
 		cursor.close()
 		connection.close()
+
+		if stock_ingr == quantity:
+			response['data'] = name_ingr
+			response['status'] = 701
+			return json.dumps(response)
+
 		response['status'] = SUCCESS
 	except:
 		response["status"] = SERVER_ERROR
@@ -368,7 +433,7 @@ def filter_order_dp():
 					cursor.callproc('select_product_id', [int(prod)])
 					for row in cursor.stored_results():
 						result_2 = row.fetchall()
-					for _, name, _, price, _, _, _ in result_2:
+					for _, name, _, price, _, _, _, _ in result_2:
 						order['PRODUCT_NAME'] = name
 						price = int(price)
 						total_price = int(cant) * price
@@ -407,7 +472,7 @@ def filter_products_ic():
 			products = []
 			for row in cursor.stored_results():
 				result = row.fetchall()
-			for id_prod, name, desc, price, unit, main_ingr, categ_prod in result:
+			for id_prod, name, desc, price, unit, main_ingr, categ_prod, status in result:
 				product = {}
 				product['ID_PRODUCT'] = int(id_prod)
 				product['NAME'] = name
@@ -415,13 +480,14 @@ def filter_products_ic():
 				product['PRICE'] = int(price)
 				product['MEASURE_UNIT'] = unit
 				product['CATEGORY'] = categ_prod
+				product['STATUS'] = status
 
 				cursor.callproc('select_ingredient', [int(main_ingr)])
 				result_1 = []
 				for row in cursor.stored_results():
 					result_1 = row.fetchall()
 
-				for _, name_ingr in result_1:
+				for _, name_ingr, _ in result_1:
 					product['MAIN_INGREDIENT'] = name_ingr
 				products.append(product)
 			response["data"] = products

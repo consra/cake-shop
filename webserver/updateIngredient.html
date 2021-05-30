@@ -42,25 +42,22 @@
   </div>
   <div class="col-9">
     <div class="container">
-
+        
     <div class="row">
       <div class="col-sm-9 col-md-7 col-lg-8 mx-auto" >
         <div class="card card-signin my-5">
           <div class="card-body">
-            <h5 class=" text-center" style="margin-bottom: 30px;">Add Ingredient</h5>
+            <h5 class=" text-center" style="margin-bottom: 30px;">Update Ingredient</h5>
             <form class="form-signin">
                <div class="form-group">
-                <label for="selectIngredient">Ingredient</label>
-                <!-- <select class="form-control" id="selectIngredient">
-                </select> -->
+                <label for="ingredientPrincipal">Ingredient</label>
+                <select class="form-control" id="ingredientPrincipal">
+                </select>
               </div>
               <div class="form-label-group">
-                <input type="text" id="inputDenumire" class="form-control" placeholder="Name" required autofocus>
+                <input type="number" id="inputCantitate" class="form-control" placeholder="Stock" required autofocus>
               </div>
-               <div class="form-label-group">
-                <input type="number" id="inputStock" class="form-control" placeholder="Stock" required autofocus>
-              </div>
-              <button class="btn btn-lg btn-block text-uppercase" id="butonAdaugaIngredient" type="button" style="background-color: #0abfbc; color:white; margin-top: 35px;"
+              <button class="btn btn-lg btn-block text-uppercase" id="butonUpdateIngredient" type="button" style="background-color: #0abfbc; color:white; margin-top: 35px;"
               >SEND</button>
               <hr class="my-4">
             </form>

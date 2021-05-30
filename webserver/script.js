@@ -33,10 +33,12 @@ $(document).ready(function () {
   if(localStorage.getItem('isAdmin') == 1){
     $('#butonRedirectCreareProdus').css({'display':'block !important'});
     $('#butonRedirectCreareIngredient').css({'display':'block !important'});
+    $('#butonRedirectUpdateIngredient').css({'display':'block !important'});
   }
   else {
     $('#butonRedirectCreareProdus').css({'display':'none'});
     $('#butonRedirectCreareIngredient').css({'display':'none'});
+    $('#butonRedirectUpdateIngredient').css({'display':'none'});
   }
 
   $.get(urlProdus, function (data, status) {
@@ -52,8 +54,9 @@ $(document).ready(function () {
         '<p class="card-text"><span style="font-weight:bolder">Price:</span><span style="margin-left: 10px;">' + produs.PRICE + '</span> LEI</p>' +       
         '<p class="card-text"><span style="font-weight:bolder">Measure Unit: </span><span style="margin-left: 10px;">' + produs.MEASURE_UNIT + '</p>' +
         '<p class="card-text"><span style="font-weight:bolder">Category: </span><span style="margin-left: 10px;">' + produs.CATEGORY + '</p>' +
+        '<p class="card-text"><span style="font-weight:bolder">Status: </span><span style="margin-left: 10px;">' + produs.STATUS + '</p>' +
         ' </div> </div></br></br>');
-      if(selectProdus != null)
+      if(selectProdus != null && produs.STATUS != 'unavailable')
         selectProdus.options.add( new Option(produs.NAME, produs.ID_PRODUCT) )
     }
   });
@@ -85,9 +88,10 @@ $(document).ready(function () {
       $('#ingrediente').append('<div class="card" style="min-width:250px; min-height:150px; margin:15px; background: #eee;">' +
         '<div class="card-body"><h5 class="card-title">' + "INGREDIENT" + '</h5>' +
         '<p class="card-text"><span class="cardDenumire">Name: </span> <span style="margin-left: 10px;">' + ingr.NAME + '</p>' +
+        '<p class="card-text"><span class="cardDenumire">Stock: </span> <span style="margin-left: 10px;">' + ingr.STOCK + '</p>' +
         ' </div> </div></br></br>');
       if(ingredientPrincipal != null)
-        ingredientPrincipal.options.add( new Option(ingr.NAME, ingr.ID_INGREDIENT) ) 
+        ingredientPrincipal.options.add( new Option(ingr.NAME, ingr.ID_INGREDIENT) )
     }
   });
 
@@ -110,9 +114,7 @@ $(document).ready(function () {
         location.href = "index.html";
       }
 
-
-
-      else 
+      else
         alert('Incorrect Credentials!')
     }
   });
@@ -160,7 +162,7 @@ $(document).ready(function () {
        if(result.status == 200){
         localStorage.setItem('token', result.TOKEN);
         token = result.TOKEN;
-        location.href = "index.html";
+        location.href = "login.html";
       }
 
       else 
@@ -190,6 +192,8 @@ $(document).ready(function () {
        console.log(result)
        if(result.status == 200){
         location.href = "produse.html";
+      } else if (result.status == 700) {
+        alert('The stock of the ' + result.data + ' ingredient has become unavailable! Please select another main ingredient!')
       }
     }
   })
@@ -205,6 +209,10 @@ $(document).ready(function () {
 
   $('#butonRedirectCreareIngredient').on('click', function() {
     location.href = "creareIngredient.html";
+  })
+
+  $('#butonRedirectUpdateIngredient').on('click', function() {
+    location.href = "updateIngredient.html";
   })
 
   $('#butonAdaugaComanda').click(function() {
@@ -226,6 +234,13 @@ $(document).ready(function () {
        console.log(result)
        if(result.status == 200){
         location.href = "comenzi.html";
+      } else if (result.status == 700) {
+          alert('The requested quantity is not currently available!')
+      } else if (result.status == 701) {
+          location.href = "comenzi.html";
+          if (localStorage.getItem('isAdmin') == 1) {
+            alert('The stock of the ' + result.data + ' ingredient has become unavailable!')
+          }
       }
     }
   })
@@ -233,7 +248,8 @@ $(document).ready(function () {
 
   $('#butonAdaugaIngredient').click(function() {
     var informatii = {
-      NAME: $('#inputDenumire').val()
+      NAME: $('#inputDenumire').val(),
+      STOCK: $('#inputStock').val()
     };
     console.log(informatii)
 
@@ -250,6 +266,29 @@ $(document).ready(function () {
       }
     }
   })
+  });
+
+  $('#butonUpdateIngredient').click(function() {
+    var informatii = {
+      STOCK: $('#inputCantitate').val(),
+      ID_INGREDIENT: $('#ingredientPrincipal')[0].value
+    };
+
+    console.log(informatii)
+
+    $.ajax({
+      type: "PUT",
+      url: urlIngr,
+      contentType: "application/json; charset=utf-8",
+      dataType: "JSON",
+      data: JSON.stringify(informatii),
+      success: function(result){
+       console.log(result)
+       if(result.status == 200){
+          location.href = "ingrediente.html";
+       }
+      }
+    })
   });
 
   $('#atributFiltrare').on('change', function () {
@@ -305,7 +344,7 @@ $('#ingredientPrincipal').on('change', function () {
 
         //adaugam head-ul
         $('#tabelInfo').append('<thead> \
-    <tr  style="background: #ea873dd6; color:white;">\
+    <tr  style="background: #cf6f97; color:white;">\
       <th scope="col">#</th>\
       <th scope="col">Name</th>\
       <th scope="col">Price</th>\
@@ -389,7 +428,7 @@ $('#ingredientPrincipal').on('change', function () {
 
         //adaugam head-ul
         $('#tabelInfo2').append('<thead> \
-    <tr  style="background: #ea873dd6; color:white;">\
+    <tr  style="background: #cf6f97; color:white;">\
       <th scope="col">#</th>\
       <th scope="col">Order Date</th>\
       <th scope="col">Client</th>\
@@ -436,27 +475,29 @@ function getGraficCategorie() {
       arrayFiltrare.push(produs.CATEGORY);
       arrayProduse.push(produs.NR_PROD);
     }
-    desenareGrafic(arrayFiltrare, arrayProduse);
+    desenareGrafic(arrayFiltrare, arrayProduse, 'Products');
   });
 }
 
 function getGraficIngredient() {
-  $.get(urlGraficIngredient, function (data, status) {
+  $.get(urlIngr, function (data, status) {
     arrayFiltrare = [];
     arrayProduse = [];
     //console.log( "Sample of data:", data );
     console.log("Data: " + data + "\nStatus: " + status);
     produse = (JSON.parse(data))['data'];
     for (var produs of produse){
-      arrayFiltrare.push(produs.NAME);
-      arrayProduse.push(produs.NR_PROD);
+      if (produs.STOCK > 0) {
+        arrayFiltrare.push(produs.NAME);
+        arrayProduse.push(produs.STOCK);
+      }
     }
-    desenareGrafic(arrayFiltrare, arrayProduse);
+    desenareGrafic(arrayFiltrare, arrayProduse, 'Stock');
   });
 
 }
 
-function desenareGrafic(arrayFiltrare, arrayProduse) {
+function desenareGrafic(arrayFiltrare, arrayProduse, messg) {
  if($('canvas') != null)
   $('canvas').remove();
 
@@ -476,49 +517,46 @@ function desenareGrafic(arrayFiltrare, arrayProduse) {
       data: {
         labels: arrayFiltrare,
         datasets: [{
-          label: 'Products Number',
+          label: messg,
           data: arrayProduse,
-          backgroundColor: [
-          'rgba(255, 99, 132, 0.2)',
-          'rgba(54, 162, 235, 0.2)',
-          'rgba(255, 206, 86, 0.2)',
-          'rgba(75, 192, 192, 0.2)',
-          'rgba(153, 102, 255, 0.2)',
-          'rgba(255, 159, 64, 0.2)'
-          ],
-          borderColor: [
-          'rgba(255, 99, 132, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)',
-          'rgba(255, 159, 64, 1)'
-          ],
+          backgroundColor: ["red", "green","blue","orange","brown", "yellow", "pink"],
+          borderColor: ["red", "green","blue","orange","brown", "yellow", "pink"],
           borderWidth: 1
         }]
       },
       options: {
         legend: {
-            display: false,
+            display: false
          },
         scales: {
           xAxes: [{
             gridLines: {
-              color: 'rgba(171,171,171,1)',
+              color: 'rgba(218,220,220,1)',
               lineWidth: 1
             },
               ticks: {
-                      fontColor : 'rgba(255,255,255,1)'}
+                    display: false
+            },
+            scaleLabel: {
+              display: true,
+              labelString: 'INGREDIENTS',
+              fontColor : 'rgba(0,0,0,1)'
+            }
 
           }],
           yAxes: [{
             ticks: {
               beginAtZero: true,
-                fontColor : 'rgba(255,255,255,1)'
+                fontColor : 'rgba(84,80,80,1)'
             },
             gridLines: {
-              color: 'rgba(255,255,255,1)',
-              lineWidth: 0.5
+              color: 'rgba(218,220,220,1)',
+              lineWidth: 1
+            },
+            scaleLabel: {
+              display: true,
+              labelString: 'QUANTITY',
+              fontColor : 'rgba(0,0,0,1)'
             }
           }]
         }
