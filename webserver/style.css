@@ -1,10 +1,10 @@
 body {
-	background: linear-gradient(to right, #232526, #414345); !important;
+	background: linear-gradient(to right, #cf6f9717, #0abfbc3d) !important;
 }
 
 .myNav {
-	box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.42), 0 6px 10px 0 rgba(0, 0, 0, 0.3), 0 1px 18px 0 rgba(0, 0, 0, 0.3);
-	background: linear-gradient(to left, #cd7b3d, #428673) !important;
+	box-shadow: 0 3px 5px -1px rgba(0, 0, 0, .2), 0 6px 10px 0 rgba(0, 0, 0, .14), 0 1px 18px 0 rgba(0, 0, 0, .12);
+	background: linear-gradient(to left, #cf6f97, #0abfbc) !important;
 }
 
 .meniu {
@@ -18,13 +18,12 @@ body {
 }
 
 .active {
-	background: linear-gradient(to left, #cd7b3d, #345f51) !important;
+	background: linear-gradient(to left, #cf6f97, #0abfbc) !important;
 }
 
 .nav-link {
 	text-align: center;
-	background-color: #47937f;
-	color: white;
+	color: #0abfbc;
 	box-shadow: 0 3px 5px -1px rgba(0,0,0,.2), 0 6px 10px 0 rgba(0,0,0,.14), 0 1px 18px 0 rgba(0,0,0,.12);
 }
 
@@ -44,8 +43,8 @@ body {
 	margin:16px 14px 0;
 	width:calc(100% - 32px);
 	height:100px;
-	background-color: #47947f;
-	box-shadow: 0 0 12px #47947f;
+	background-color: #0abfbc;
+	box-shadow: 0 0 12px #0abfbc;
 }
 
 .index-links div h3:hover {
@@ -107,16 +106,16 @@ body {
 	padding: 20px;
 	box-shadow: 0 3px 5px -1px rgba(0,0,0,.2), 0 6px 10px 0 rgba(0,0,0,.14), 0 1px 18px 0 rgba(0,0,0,.12);
 
-} 
+}
 
 .card-body {
-	background: #ccc3b459;
+	background: white;
 	box-shadow: 0 3px 5px -1px rgba(0,0,0,.2), 0 6px 10px 0 rgba(0,0,0,.14), 0 1px 18px 0 rgba(0,0,0,.12);
 
 }
 
 .card-title {
-	background: #ce7c3f;
+	background: #0abfbc;
 	color: white;
 	font-size: 24px;
 	text-transform: uppercase;
