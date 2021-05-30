@@ -96,7 +96,7 @@
               [
                 {
                   "params": [
-                    "stock"
+                    "quantity"
                   ],
                   "type": "field"
                 },
@@ -113,7 +113,7 @@
         "timeFrom": null,
         "timeRegions": [],
         "timeShift": null,
-        "title": "Evolution of Products Stock",
+        "title": "Products Statistics",
         "tooltip": {
           "shared": true,
           "sort": 0,
@@ -165,7 +165,7 @@
       "refresh_intervals": []
     },
     "timezone": "",
-    "title": "Products Stock",
+    "title": "Products Sold",
     "uid": "0CXW9k6Mk",
     "version": 1
   }
