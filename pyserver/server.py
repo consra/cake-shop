@@ -49,7 +49,7 @@ def get_ingredients():
 		result = []
 		for row in cursor.stored_results():
 			result = row.fetchall()
-		for id, name, stock in result:
+		for id, name, stock, _ in result:
 			ingredient = {}
 			ingredient['ID_INGREDIENT'] = int(id)
 			ingredient['NAME'] = name
@@ -73,7 +73,10 @@ def add_ingredient():
 		data = request.json
 		name = data['NAME']
 		stock = data['STOCK']
-		cursor.callproc('add_ingredient', [name, stock])
+		now = datetime.datetime.now()
+		date_cmd = now.strftime('%Y-%m-%d %H:%M:%S')
+		date_cmd = datetime.datetime.strptime(date_cmd, '%Y-%m-%d %H:%M:%S')
+		cursor.callproc('add_ingredient', [name, stock, date_cmd])
 		cursor.close()
 		connection.close()
 		response['status'] = SUCCESS
@@ -90,7 +93,10 @@ def update_ingredient():
 		data = request.json
 		id_ingr = data['ID_INGREDIENT']
 		stock = data['STOCK']
-		cursor.callproc('update_ingredient', [int(id_ingr), stock])
+		now = datetime.datetime.now()
+		date_cmd = now.strftime('%Y-%m-%d %H:%M:%S')
+		date_cmd = datetime.datetime.strptime(date_cmd, '%Y-%m-%d %H:%M:%S')
+		cursor.callproc('update_ingredient', [int(id_ingr), stock, date_cmd])
 		cursor.close()
 		connection.close()
 		response['status'] = SUCCESS
@@ -139,7 +145,7 @@ def get_products():
 			result_1 = []
 			for row in cursor.stored_results():
 				result_1 = row.fetchall()
-			for _, name, _ in result_1:
+			for _, name, _, _ in result_1:
 				product['MAIN_INGREDIENT'] = name
 			products.append(product)
 		response["data"] = products
@@ -170,7 +176,7 @@ def add_product():
 			result = row.fetchall()
 		stock_ingr = 0
 		name_ingr = ''
-		for _, name_ingredient, stock in result:
+		for _, name_ingredient, stock, _ in result:
 			stock_ingr = int(stock)
 			name_ingr = name_ingredient
 
@@ -332,7 +338,7 @@ def add_order():
 			result = row.fetchall()
 		stock_ingr = 0
 		name_ingr = ''
-		for _, name, stock in result:
+		for _, name, stock, _ in result:
 			stock_ingr = int(stock)
 			name_ingr = name
 
@@ -487,7 +493,7 @@ def filter_products_ic():
 				for row in cursor.stored_results():
 					result_1 = row.fetchall()
 
-				for _, name_ingr, _ in result_1:
+				for _, name_ingr, _, _ in result_1:
 					product['MAIN_INGREDIENT'] = name_ingr
 				products.append(product)
 			response["data"] = products
